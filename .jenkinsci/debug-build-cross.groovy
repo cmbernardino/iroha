@@ -2,8 +2,9 @@
 
 def doDebugBuild() {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
-  	+ " -v /opt/efs-test/build:/opt/iroha_build"
-  	+ " -v /opt/efs-test/build/ccache:${CCACHE_DIR}") {
+  	+ " -v /opt/efs-test/build:/var/jenkins/workspace"
+  	+ " -v /opt/efs-test/build/ccache:${CCACHE_DIR}"
+  	+ " --user root") {
     sh """
       ccache --version
       ccache --show-stats
@@ -19,7 +20,7 @@ def doDebugBuild() {
         -DTESTING=ON \
         -DCMAKE_TOOLCHAIN_FILE=/opt/toolchain.cmake
     """
-    sh "cmake --build build -- -j8"
+    sh "cmake --build build -- -j4"
     sh "ccache --show-stats"
   }
 }
