@@ -72,6 +72,7 @@ pipeline {
           steps {
             script {
               debugBuild = load ".jenkinsci/debug-build-cross.groovy"
+              debugBuild.doDebugBuild()
             }
           }
           // post {
