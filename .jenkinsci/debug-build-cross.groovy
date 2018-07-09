@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 def doReleaseBuild() {
-  docker.image(${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64).inside(""
+  docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
   	+ " -v /opt/efs-test/build:/opt/iroha_build"
   	+ " -v /opt/efs-test/build/ccache:${CCACHE_DIR}") {
     sh """
