@@ -22,3 +22,6 @@ def doReleaseBuild() {
     sh "cmake --build build -- -j8"
     sh "ccache --show-stats"
   }
+}
+
+return this
