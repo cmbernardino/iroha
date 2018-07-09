@@ -2,8 +2,7 @@
 
 def doDebugBuild() {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
-  	+ " -v /opt/ccache:${CCACHE_DIR}"
-  	+ " --user root") {
+  	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
       ccache --version
       ccache --show-stats
