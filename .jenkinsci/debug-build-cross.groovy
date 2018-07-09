@@ -2,7 +2,6 @@
 
 def doDebugBuild() {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
-  	+ " -v /opt/efs-test/build:/var/jenkins/workspace"
   	+ " -v /opt/efs-test/build/ccache:${CCACHE_DIR}"
   	+ " --user root") {
     sh """
