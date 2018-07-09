@@ -2,7 +2,7 @@
 
 def doDebugBuild() {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
-  	+ " -v /opt/efs-test/build/ccache:${CCACHE_DIR}"
+  	+ " -v /opt/ccache:${CCACHE_DIR}"
   	+ " --user root") {
     sh """
       ccache --version
