@@ -23,7 +23,7 @@ def doDebugBuild() {
     sh """
       for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/bin/irohad | \
       	grep -v 'not found' | \
-      	awk '/\.so/{print $1}' | \
+      	awk '/\\.so/{print \$1}' | \
       	sort -u); do \
       	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/bin \\; \
       done
