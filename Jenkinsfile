@@ -68,6 +68,13 @@ pipeline {
         }
       }
     }
+    post {
+      success {
+        script {
+          sh "chown -R root:root $WS_DIR/build"
+        }
+      }
+    }
     stage('Test Debug') {
       when {
         beforeAgent true

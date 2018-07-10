@@ -29,7 +29,6 @@ def doDebugBuild() {
       	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
       done
     """
-    sh "chown -R root:root $WS_DIR/build"
   }
 }
 
