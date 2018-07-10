@@ -38,6 +38,11 @@ namespace iroha {
           propagate_transaction,
           void(std::shared_ptr<const shared_model::interface::Transaction>));
 
+      MOCK_METHOD1(
+          propagateBatch,
+          void(
+              const shared_model::interface::types::SharedTxsCollectionType &));
+
       MOCK_CONST_METHOD0(
           on_proposal,
           rxcpp::observable<

@@ -47,7 +47,7 @@ namespace iroha {
 
       virtual void transactionSequenceHandle(
           const shared_model::interface::TransactionSequence
-              &transactionSequence);
+              &transactionSequence) = 0;
 
       /**
        * Subscribers will be notified with transaction status
