@@ -36,7 +36,7 @@ pipeline {
     IROHA_POSTGRES_PASSWORD = "${GIT_COMMIT}"
     IROHA_POSTGRES_PORT = 5432
     // WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-${BUILD_NUMBER}"
-    WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-30"
+    WS_DIR = "/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
   }
 
   options {
