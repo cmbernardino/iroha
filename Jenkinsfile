@@ -46,17 +46,6 @@ pipeline {
 
   agent any
   stages {
-    stage ('Stop same job builds') {
-      agent { label 'master' }
-      steps {
-        script {
-          if (GIT_LOCAL_BRANCH != "develop") {
-            def builds = load ".jenkinsci/cancel-builds-same-job.groovy"
-            builds.cancelSameJobBuilds()
-          }
-        }
-      }
-    }
     stage ('x86_64_linux') {
       when {
         beforeAgent true
