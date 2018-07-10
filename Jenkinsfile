@@ -67,11 +67,11 @@ pipeline {
           }
         }
       }
-    }
-    post {
-      success {
-        script {
-          sh "chown -R root:root $WS_DIR/build"
+      post {
+        success {
+          script {
+            sh "chown -R root:root $WS_DIR/build"
+          }
         }
       }
     }
