@@ -35,7 +35,8 @@ pipeline {
     IROHA_POSTGRES_USER = "pguser${GIT_COMMIT}"
     IROHA_POSTGRES_PASSWORD = "${GIT_COMMIT}"
     IROHA_POSTGRES_PORT = 5432
-    WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-${BUILD_NUMBER}"
+    // WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-${BUILD_NUMBER}"
+    WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-30"
   }
 
   options {
@@ -67,23 +68,24 @@ pipeline {
         }
       }
     }
-    // stage('Test Debug') {
-    //   when {
-    //     beforeAgent true
-    //     allOf {
-    //       expression { params.build_type == 'Debug' }
-    //       expression { return params.iroha }
-    //       expression { return params.x86_64_linux }
-    //     }
-    //   }
-    //   agent { label 'armv8-cross' }
-    //   steps {
-    //     dir("${WS_DIR}") {
-    //       script {
-
-    //       }
-    //     }
-    //   }
-    // }
+    stage('Test Debug') {
+      when {
+        beforeAgent true
+        allOf {
+          expression { params.build_type == 'Debug' }
+          expression { return params.iroha }
+          expression { return params.x86_64_linux }
+        }
+      }
+      agent { label 'armv8-cross' }
+      steps {
+        dir("${WS_DIR}") {
+          script {
+            testBuild = load ".jenkinsci/debug-test.groovy"
+            testBuild.doDebugTest()
+          }
+        }
+      }
+    }
   }
 }
