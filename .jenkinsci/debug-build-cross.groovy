@@ -25,7 +25,7 @@ def doDebugBuild() {
       	grep -v 'not found' | \
       	awk '/\\.so/{print \$1}' | \
       	sort -u); do \
-      	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/bin \\; \
+      	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/bin \\; ; \
       done
     """
   }
