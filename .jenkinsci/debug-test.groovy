@@ -8,13 +8,9 @@ def doDebugTest() {
       --name ${env.IROHA_POSTGRES_HOST} \
       --ports 127.0.0.1:5432:5432 postgres:9.5
   """
+  sh "mv $WS_DIR/build/shared_libs/* /usr/lib/$CROSS_TRIPLE_PREFIX"
   sh """
-    cd build; \
-    IROHA_POSTGRES_HOST=${env.IROHA_POSTGRES_HOST} \
-    IROHA_POSTGRES_PORT=${env.IROHA_POSTGRES_PORT} \
-    IROHA_POSTGRES_USER=${env.IROHA_POSTGRES_USER} \
-    IROHA_POSTGRES_PASSWORD=${env.IROHA_POSTGRES_PASSWORD} \
-    ctest --output-on-failure
+    cd build; ctest --output-on-failure
   """
 }
 
