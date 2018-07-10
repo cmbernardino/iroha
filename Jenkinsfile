@@ -70,7 +70,7 @@ pipeline {
       post {
         success {
           script {
-            sh "chown -R root:root $WS_DIR/build"
+            sh "sudo chown -R root:root $WS_DIR/build"
           }
         }
       }
