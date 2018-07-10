@@ -2,8 +2,7 @@
 
 def doDebugBuild() {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
-  	+ " -v /opt/ccache:${CCACHE_DIR}"
-  	+ " --user root") {
+  	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
       ccache --version
       ccache --show-stats
@@ -23,13 +22,14 @@ def doDebugBuild() {
     sh "ccache --show-stats"
     sh "mkdir $WS_DIR/build/shared_libs"
     sh """
-      for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/bin/irohad | \
+      for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/bin/* | \
       	grep -v 'not found' | \
       	awk '/\\.so/{print \$1}' | \
       	sort -u); do \
       	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
       done
     """
+    sh "chown -R root:root $WS_DIR/build"
   }
 }
 
