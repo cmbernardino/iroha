@@ -38,6 +38,10 @@ namespace iroha {
           std::shared_ptr<network::PeerCommunicationService> pcs,
           std::shared_ptr<MstProcessor> mst_processor);
 
+      void transactionSequenceHandle(
+          const shared_model::interface::TransactionSequence
+              &transactionSequence) override;
+
       void transactionHandle(
           std::shared_ptr<shared_model::interface::Transaction> transaction)
           override;
@@ -47,6 +51,16 @@ namespace iroha {
       transactionNotifier() override;
 
      private:
+      /**
+       * Check if all transactions have signatures
+       * @param transactions
+       * @return true if every transaction has enough signatures, false
+       * otherwise
+       */
+      bool hasAllSignatures(
+          const shared_model::interface::types::SharedTxsCollectionType
+              &transactions);
+
       // connections
       std::shared_ptr<network::PeerCommunicationService> pcs_;
 

@@ -20,8 +20,10 @@
 #include <boost/format.hpp>
 
 #include "backend/protobuf/transaction.hpp"
+#include "interfaces/common_objects/transaction_sequence_common.hpp"
 #include "interfaces/iroha_internal/block.hpp"
 #include "interfaces/iroha_internal/proposal.hpp"
+#include "interfaces/iroha_internal/transaction_sequence.hpp"
 #include "validation/stateful_validator_common.hpp"
 
 namespace iroha {
@@ -143,6 +145,35 @@ namespace iroha {
                 .build());
         ;
       });
+    }
+
+    bool TransactionProcessorImpl::hasAllSignatures(
+        const shared_model::interface::types::SharedTxsCollectionType
+            &transactions) {
+      for (const auto &tx : transactions) {
+        if (boost::size(tx->signatures()) < tx->quorum()) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    void TransactionProcessorImpl::transactionSequenceHandle(
+        const shared_model::interface::TransactionSequence
+            &transactionSequence) {
+      for (const shared_model::interface::types::SharedTxsCollectionType
+               &batch : transactionSequence.batches()) {
+        if (hasAllSignatures(batch)) {
+          pcs_->propagateBatch(batch);
+        } else {
+          // TODO: kamilsa propagate batch directly to mst when its interface
+          // allows that
+          log_->info("waiting for quorum signatures in a batch");
+          for (const auto &tx : batch) {
+            mst_processor_->propagateTransaction(tx);
+          }
+        }
+      }
     }
 
     void TransactionProcessorImpl::transactionHandle(

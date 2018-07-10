@@ -20,6 +20,7 @@
 
 #include <rxcpp/rx.hpp>
 
+#include "interfaces/common_objects/transaction_sequence_common.hpp"
 #include "validation/stateful_validator_common.hpp"
 
 namespace shared_model {
@@ -27,6 +28,7 @@ namespace shared_model {
     class Block;
     class Proposal;
     class Transaction;
+    class TransactionSequence;
   }  // namespace interface
 }  // namespace shared_model
 
@@ -49,6 +51,10 @@ namespace iroha {
       virtual void propagate_transaction(
           std::shared_ptr<const shared_model::interface::Transaction>
               transaction) = 0;
+
+      virtual void propagateBatch(
+          const shared_model::interface::types::SharedTxsCollectionType
+              &transactions) = 0;
 
       /**
        * Event is triggered when proposal arrives from network.

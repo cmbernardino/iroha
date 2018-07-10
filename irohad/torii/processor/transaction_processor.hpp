@@ -24,6 +24,7 @@ namespace shared_model {
   namespace interface {
     class Transaction;
     class TransactionResponse;
+    class TransactionSequence;
   }  // namespace interface
 }  // namespace shared_model
 
@@ -43,6 +44,10 @@ namespace iroha {
       virtual void transactionHandle(
           std::shared_ptr<shared_model::interface::Transaction>
               transaction) = 0;
+
+      virtual void transactionSequenceHandle(
+          const shared_model::interface::TransactionSequence
+              &transactionSequence);
 
       /**
        * Subscribers will be notified with transaction status

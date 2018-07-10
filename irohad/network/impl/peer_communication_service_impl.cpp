@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "network/impl/peer_communication_service_impl.hpp"
+#include "interfaces/iroha_internal/transaction_sequence.hpp"
 
 namespace iroha {
   namespace network {
@@ -34,6 +35,18 @@ namespace iroha {
             transaction) {
       log_->info("propagate tx");
       ordering_gate_->propagateTransaction(transaction);
+    }
+
+    void PeerCommunicationServiceImpl::propagateBatch(
+        const shared_model::interface::types::SharedTxsCollectionType
+            &transactions) {
+      log_->info("propagate transaction sequence");
+
+      // TODO kamilsa 10.07.2018 rework that to send whole sequence at once to
+      // ordering gate
+      for (const auto &transaction : transactions) {
+        ordering_gate_->propagateTransaction(transaction);
+      }
     }
 
     rxcpp::observable<std::shared_ptr<shared_model::interface::Proposal>>
