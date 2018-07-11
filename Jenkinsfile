@@ -59,7 +59,7 @@ def buildDebugStage(label, environment) {
   }
 }
 
-def testDebugStage(label) {
+def testDebugStage(label, environment) {
   return {
     node(label) {
       withEnv(environment) {
@@ -73,11 +73,19 @@ def testDebugStage(label) {
 }
 
 def buildDebugSteps = buildAgentLabels.collectEntries {
-  ["Agent ${it}" : buildDebugStage(it, environment)]
+  ["Run build on: ${it}" : buildDebugStage(it, environment)]
+}
+
+def buildTestSteps = testAgentLabels.collectEntries {
+  ["Run tests on: ${it}" : testDebugStage(it, environment)]
 }
 
 stage('Build') {
   parallel buildDebugSteps
+}
+
+stage('Test') {
+  parallel buildTestSteps
 }
 // buildBuilders = [:]
 
