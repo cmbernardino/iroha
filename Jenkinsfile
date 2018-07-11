@@ -25,9 +25,11 @@
 //   timestamps()
 // ])
 
+def environment = []
+
 node('master') {
   checkout scm
-  def environment = [
+  environment = [
     "CCACHE_DIR=/opt/.ccache",
     "DOCKER_REGISTRY_BASENAME=hyperledger/iroha",
     "IROHA_NETWORK=iroha-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
