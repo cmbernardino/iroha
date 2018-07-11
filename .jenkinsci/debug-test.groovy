@@ -12,8 +12,7 @@ def doDebugTest() {
 	+ " -e IROHA_POSTGRES_PORT=${env.IROHA_POSTGRES_PORT}"
 	+ " -e IROHA_POSTGRES_USER=${env.IROHA_POSTGRES_USER}"
 	+ " -e IROHA_POSTGRES_PASSWORD=${env.IROHA_POSTGRES_PASSWORD}"
-	+ " --network=${env.IROHA_NETWORK}"
-	+ " -v ${WS_DIR}:${WS_DIR}") {
+	+ " --network=${env.IROHA_NETWORK}") {
 	    sh "cp $WS_DIR/build/shared_libs/* /usr/lib/"
 	  	sh "cd build; ctest --output-on-failure"
 	}
