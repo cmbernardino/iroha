@@ -19,7 +19,7 @@ def builders = [:]
 //     }
 //   }
 // }
-
+node('master') {
   for (x in labels) {
     def label = x // Need to bind the label variable before the closure - can't do 'for (label in labels)'
 
@@ -29,10 +29,11 @@ def builders = [:]
       node(label) {
         dir("${WS_DIR}") {
           checkout scm
-          //debugBuild.doDebugBuild()
-          echo 'DONE!!'
+          debugBuild.doDebugBuild()
         }
       }
     }
   }
   parallel builders
+}
+
