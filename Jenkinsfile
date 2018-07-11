@@ -26,15 +26,15 @@ for (x in labels) {
   // Create a map to pass in to the 'parallel' step so we can fire all the builds at once
   builders[label] = {
     //transformDebugStep(label)
-    stage('Build') {
-      node(label) {
-        dir("${WS_DIR}") {
-          checkout scm
-          debugBuild.doDebugBuild()
-        }
+    node(label) {
+      dir("${WS_DIR}") {
+        checkout scm
+        debugBuild.doDebugBuild()
       }
     }
   }
 }
 
-parallel builders
+stage('Build') {
+  parallel builders
+}
