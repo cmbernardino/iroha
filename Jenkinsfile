@@ -93,3 +93,5 @@ for (x in testAgentLabels) {
     }
   }
 }
+
+parallel buildBuilders
