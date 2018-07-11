@@ -44,26 +44,9 @@ node('master') {
 def buildAgentLabels = ['x86_64_aws_cross']
 def testAgentLabels = ['armv8-cross']
 def buildBuilders = [:]
-// def transformDebugStep(label) {
-//   // We need to wrap what we return in a Groovy closure, or else it's invoked
-//   // when this method is called, not when we pass it to parallel.
-//   // To do this, you need to wrap the code below in { }, and either return
-//   // that explicitly, or use { -> } syntax.
-//   return {
-//     node(label) {
-//       dir("${WS_DIR}") {
-//         debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-//         checkout scm
-//         debugBuild.doDebugBuild()
-//       }
-//     }
-//   }
-// }
 
-for (x in buildAgentLabels) {
-  def label = x
-  buildBuilders[label] = {
-    // transformDebugStep(label)
+def buildDebugStep(label) {
+  return {
     node(label) {
       withEnv(environment) {
         dir("${WS_DIR}") {
@@ -76,21 +59,33 @@ for (x in buildAgentLabels) {
   }
 }
 
-parallel buildBuilders
-buildBuilders = [:]
-
-for (x in testAgentLabels) {
-  def label = x
-  buildBuilders[label] = {
-    // transformDebugStep(label)
+def testDebugStep(label) {
+  return {
     node(label) {
       withEnv(environment) {
         dir("${WS_DIR}") {
-          testBuild = load ".jenkinsci/debug-test.grovy"
+          testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest()
         }
       }
     }
+  }
+}
+
+for (x in buildAgentLabels) {
+  def label = x
+  buildBuilders[label] = {
+    buildDebugStep(label)
+  }
+}
+
+parallel buildBuilders
+buildBuilders = [:]
+
+for (x in buildAgentLabels) {
+  def label = x
+  buildBuilders[label] = {
+    testDebugStep(label)
   }
 }
 
