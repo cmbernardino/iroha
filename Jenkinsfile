@@ -1,3 +1,7 @@
+environment {
+  WS_DIR = "/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
+}
+
 def debugBuild = load ".jenkinsci/debug-build-cross.groovy"
 def labels = ['x86_64_aws_cross', 'x86_64_aws_cross']
 def builders = [:]
@@ -31,4 +35,3 @@ def builders = [:]
     }
   }
   parallel builders
-
