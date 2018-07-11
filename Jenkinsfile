@@ -89,6 +89,13 @@ pipeline {
           }
         }
       }
+      post {
+        always {
+          script {
+            sh "docker network rm ${env.IROHA_NETWORK}"
+          }
+        }
+      }
     }
   }
 }
