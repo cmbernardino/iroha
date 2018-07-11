@@ -3,7 +3,7 @@ environment {
 }
 
 def debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-def labels = ['x86_64_aws_cross', 'x86_64_aws_cross']
+def labels = ['x86_64_aws_cross']
 def builders = [:]
 // def transformDebugStep(label) {
 //   // We need to wrap what we return in a Groovy closure, or else it's invoked
@@ -29,7 +29,8 @@ def builders = [:]
       node(label) {
         dir("${WS_DIR}") {
           checkout scm
-          debugBuild.doDebugBuild()
+          //debugBuild.doDebugBuild()
+          echo 'DONE!!'
         }
       }
     }
