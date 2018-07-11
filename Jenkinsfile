@@ -78,6 +78,9 @@ pipeline {
         }
       }
       agent { label 'armv8-cross' }
+      options {
+        skipDefaultCheckout()
+      }
       steps {
         dir("${WS_DIR}") {
           script {

@@ -9,7 +9,7 @@ def doDebugTest() {
       --name ${env.IROHA_POSTGRES_HOST} \
       -p 127.0.0.1:5432:5432 postgres:9.5
   """
-  sh "mv $WS_DIR/build/shared_libs/* /usr/lib/aarch64-linux-gnu/"
+  sh "sudo cp $WS_DIR/build/shared_libs/* /usr/lib/aarch64-linux-gnu/"
   sh """
     cd build; ctest --output-on-failure
   """
