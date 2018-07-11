@@ -67,13 +67,6 @@ pipeline {
           }
         }
       }
-      post {
-        success {
-          script {
-            sh "sudo chown -R root:root $WS_DIR/build"
-          }
-        }
-      }
     }
     stage('Test Debug') {
       when {
