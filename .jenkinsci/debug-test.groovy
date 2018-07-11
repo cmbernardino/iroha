@@ -11,7 +11,7 @@ def doDebugTest() {
   """
   sh "sudo cp $WS_DIR/build/shared_libs/* /usr/lib/aarch64-linux-gnu/"
   sh """
-    cd build; ctest --output-on-failure
+    cd build; IROHA_POSTGRES_HOST=127.0.0.1 IROHA_POSTGRES_PORT=5432 ctest --output-on-failure
   """
 }
 
