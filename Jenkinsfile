@@ -60,14 +60,18 @@ def transformDebugStep(label) {
   }
 }
 
-if(params.build_type == 'Debug' && params.iroha) {
-  for (x in labels) {
-    def label = x // Need to bind the label variable before the closure - can't do 'for (label in labels)'
+node(any) {
+  stage('Build') {
+    if(params.build_type == 'Debug' && params.iroha) {
+      for (x in labels) {
+        def label = x // Need to bind the label variable before the closure - can't do 'for (label in labels)'
 
-    // Create a map to pass in to the 'parallel' step so we can fire all the builds at once
-    builders[label] = {
-      transformDebugStep(label)
+        // Create a map to pass in to the 'parallel' step so we can fire all the builds at once
+        builders[label] = {
+          transformDebugStep(label)
+        }
+      }
+      parallel builders
     }
   }
-  parallel builders
 }
