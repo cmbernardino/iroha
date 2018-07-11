@@ -30,10 +30,10 @@ node('master') {
   def environment = [
     "CCACHE_DIR=/opt/.ccache",
     "DOCKER_REGISTRY_BASENAME=hyperledger/iroha",
-    "IROHA_NETWORK=iroha-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}",
-    "IROHA_POSTGRES_HOST=pg-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}",
-    "IROHA_POSTGRES_USER=pguser${GIT_COMMIT}",
-    "IROHA_POSTGRES_PASSWORD=${GIT_COMMIT}",
+    "IROHA_NETWORK=iroha-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
+    "IROHA_POSTGRES_HOST=pg-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
+    "IROHA_POSTGRES_USER=pguser${env.GIT_COMMIT}",
+    "IROHA_POSTGRES_PASSWORD=${env.GIT_COMMIT}",
     "IROHA_POSTGRES_PORT=5432",
     "WS_DIR=/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
   ]
