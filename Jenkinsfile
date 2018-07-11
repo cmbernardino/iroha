@@ -1,7 +1,3 @@
-environment {
-  WS_DIR = "/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
-}
-
 def debugBuild = load ".jenkinsci/debug-build-cross.groovy"
 def labels = ['x86_64_aws_cross']
 def builders = [:]
@@ -19,7 +15,7 @@ def builders = [:]
 //     }
 //   }
 // }
-node('master') {
+
   for (x in labels) {
     def label = x // Need to bind the label variable before the closure - can't do 'for (label in labels)'
 
@@ -27,7 +23,7 @@ node('master') {
     builders[label] = {
       //transformDebugStep(label)
       node(label) {
-        dir("${WS_DIR}") {
+        dir("/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30") {
           checkout scm
           debugBuild.doDebugBuild()
         }
@@ -35,5 +31,3 @@ node('master') {
     }
   }
   parallel builders
-}
-
