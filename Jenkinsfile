@@ -18,84 +18,57 @@ properties([parameters([
   choice(choices: 'Release\nDebug', description: 'Android bindings build type', name: 'ABBuildType'),
   choice(choices: 'arm64-v8a\narmeabi-v7a\narmeabi\nx86_64\nx86', description: 'Android bindings platform', name: 'ABPlatform'),
   booleanParam(defaultValue: false, description: 'Build docs', name: 'Doxygen'),
-  string(defaultValue: '4', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')])])
+  string(defaultValue: '4', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')])
+])
 
+environment {
+  CCACHE_DIR = '/opt/.ccache'
+  CCACHE_RELEASE_DIR = '/opt/.ccache-release'
+  SORABOT_TOKEN = credentials('SORABOT_TOKEN')
+  SONAR_TOKEN = credentials('SONAR_TOKEN')
+  GIT_RAW_BASE_URL = "https://raw.githubusercontent.com/hyperledger/iroha"
+  DOCKER_REGISTRY_BASENAME = "hyperledger/iroha"
 
-pipeline {
-  environment {
-    CCACHE_DIR = '/opt/.ccache'
-    CCACHE_RELEASE_DIR = '/opt/.ccache-release'
-    SORABOT_TOKEN = credentials('SORABOT_TOKEN')
-    SONAR_TOKEN = credentials('SONAR_TOKEN')
-    GIT_RAW_BASE_URL = "https://raw.githubusercontent.com/hyperledger/iroha"
-    DOCKER_REGISTRY_BASENAME = "hyperledger/iroha"
+  IROHA_NETWORK = "iroha-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}"
+  IROHA_POSTGRES_HOST = "pg-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}"
+  IROHA_POSTGRES_USER = "pguser${GIT_COMMIT}"
+  IROHA_POSTGRES_PASSWORD = "${GIT_COMMIT}"
+  IROHA_POSTGRES_PORT = 5432
+  // WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-${BUILD_NUMBER}"
+  WS_DIR = "/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
+}
 
-    IROHA_NETWORK = "iroha-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}"
-    IROHA_POSTGRES_HOST = "pg-0${CHANGE_ID}-${GIT_COMMIT}-${BUILD_NUMBER}"
-    IROHA_POSTGRES_USER = "pguser${GIT_COMMIT}"
-    IROHA_POSTGRES_PASSWORD = "${GIT_COMMIT}"
-    IROHA_POSTGRES_PORT = 5432
-    // WS_DIR = "/var/jenkins/workspace/${GIT_COMMIT}-${BUILD_NUMBER}"
-    WS_DIR = "/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
-  }
+options {
+  buildDiscarder(logRotator(numToKeepStr: '20'))
+  timestamps()
+}
 
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '20'))
-    timestamps()
-  }
-
-  agent any
-  stages {
-    stage ('x86_64_linux') {
-      when {
-        beforeAgent true
-        allOf {
-          expression { params.build_type == 'Debug' }
-          expression { return params.iroha }
-          expression { return params.x86_64_linux }
-        }
-      }
-      agent {
-        label 'x86_64_aws_cross'
-      }
-      steps {
-        dir("${WS_DIR}") {
-          script {
-            checkout scm
-            debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-            debugBuild.doDebugBuild()
-          }
-        }
-      }
-    }
-    stage('Test Debug') {
-      when {
-        beforeAgent true
-        allOf {
-          expression { params.build_type == 'Debug' }
-          expression { return params.iroha }
-          expression { return params.x86_64_linux }
-        }
-      }
-      agent { label 'armv8-cross' }
-      options {
-        skipDefaultCheckout()
-      }
-      steps {
-        dir("${WS_DIR}") {
-          script {
-            testBuild = load ".jenkinsci/debug-test.groovy"
-            testBuild.doDebugTest()
-          }
-        }
-      }
-      post {
-        always {
-          script {
-            sh "docker network rm ${env.IROHA_NETWORK}"
-          }
-        }
+def debugBuild = load ".jenkinsci/debug-build-cross.groovy"
+def labels = ['x86_64_aws_cross', 'x86_64_aws_cross']
+def builders = [:]
+def transformDebugStep(label) {
+  // We need to wrap what we return in a Groovy closure, or else it's invoked
+  // when this method is called, not when we pass it to parallel.
+  // To do this, you need to wrap the code below in { }, and either return
+  // that explicitly, or use { -> } syntax.
+  return {
+    node(label) {
+      dir("${WS_DIR}") {
+        checkout scm
+        debugBuild.doDebugBuild()
       }
     }
   }
+}
+
+if(params.build_type == 'Debug' && params.iroha) {
+  for (x in labels) {
+    def label = x // Need to bind the label variable before the closure - can't do 'for (label in labels)'
+
+    // Create a map to pass in to the 'parallel' step so we can fire all the builds at once
+    builders[label] = {
+      transformDebugStep(label)
+    }
+  }
+  parallel builders
 }
