@@ -12,7 +12,7 @@ def transformDebugStep(label) {
   // that explicitly, or use { -> } syntax.
   return {
     node(label) {
-      dir("${WS_DIR}") {
+      ws("${WS_DIR}") {
         checkout scm
         debugBuild.doDebugBuild()
       }
@@ -28,6 +28,4 @@ for (x in labels) {
   }
 }
 
-stage('Build') {
-  parallel builders
-}
+parallel builders
