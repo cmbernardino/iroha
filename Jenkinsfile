@@ -45,7 +45,7 @@ def buildAgentLabels = ['x86_64_aws_cross']
 def testAgentLabels = ['armv8-cross']
 def buildBuilders = [:]
 
-def buildDebugStage(label) {
+def buildDebugStage(label, environment) {
   return {
     node(label) {
       withEnv(environment) {
@@ -73,10 +73,12 @@ def testDebugStage(label) {
 }
 
 def buildDebugSteps = buildAgentLabels.collectEntries {
-  ["Agent ${it}" : buildDebugStage(it)]
+  ["Agent ${it}" : buildDebugStage(it, environment)]
 }
 
-parallel buildDebugSteps
+stage('Build') {
+  parallel buildDebugSteps
+}
 // buildBuilders = [:]
 
 // for (x in buildAgentLabels) {
