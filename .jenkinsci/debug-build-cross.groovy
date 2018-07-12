@@ -29,6 +29,14 @@ def doDebugBuild() {
       	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
       done
     """
+    sh """
+      for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/test_bin/* | \
+      	grep -v 'not found' | \
+      	awk '/\\.so/{print \$1}' | \
+      	sort -u); do \
+      	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
+      done
+    """
   }
 }
 
