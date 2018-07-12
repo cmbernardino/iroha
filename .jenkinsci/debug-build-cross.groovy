@@ -29,7 +29,7 @@ def doDebugBuild() {
     //   	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
     //   done
     // """
-    sh "cp -a \$STAGING/* $WS_DIR/build/shared_libs"
+    sh "cp -r \$STAGING/lib/* $WS_DIR/build/shared_libs"
   }
 }
 
