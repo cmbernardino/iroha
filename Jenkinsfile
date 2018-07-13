@@ -30,14 +30,14 @@ def environment = [:]
 def tasks = [:]
 
 node('master') {
-  checkout scm
+  def scmVars = checkout scm
   environment = [
     "CCACHE_DIR": "/opt/.ccache",
     "DOCKER_REGISTRY_BASENAME": "hyperledger/iroha",
-    "IROHA_NETWORK": "iroha-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
-    "IROHA_POSTGRES_HOST": "pg-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
-    "IROHA_POSTGRES_USER": "pguser${env.GIT_COMMIT}",
-    "IROHA_POSTGRES_PASSWORD": "${env.GIT_COMMIT}",
+    "IROHA_NETWORK": "iroha-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}",
+    "IROHA_POSTGRES_HOST": "pg-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}",
+    "IROHA_POSTGRES_USER": "pguser${scmVars.GIT_COMMIT}",
+    "IROHA_POSTGRES_PASSWORD": "${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PORT": "5432",
     //"WS_DIR=/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
     "WS_BASE_DIR": "/var/jenkins/workspace"
@@ -58,10 +58,10 @@ def buildSteps(label, arch, os, buildType, environment) {
     node(label) {
       withEnv(environment) {
         // checkout to expose env vars
-        checkout scm
-        def ws = "${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        def scmVars = checkout scm
+        def ws = "${scmVars.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $ws")
-        sh("echo git commit is: ${env.GIT_COMMIT}")
+        sh("echo git commit is: ${scmVars.GIT_COMMIT}")
         dir(ws) {
           // then checkout into actual workspace
           checkout scm
@@ -77,8 +77,8 @@ def testSteps(label, arch, os, environment) {
   return {
     node(label) {
       withEnv(environment) {
-        checkout scm
-        dir("${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}") {
+        def scmVars = checkout scm
+        dir("${scmVars.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}") {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest()
         }
