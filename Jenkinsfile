@@ -25,33 +25,41 @@
 //   timestamps()
 // ])
 
-def environment = []
+def environmentList = []
+def tasks = [:]
 
 node('master') {
   checkout scm
-  environment = [
-    "CCACHE_DIR=/opt/.ccache",
-    "DOCKER_REGISTRY_BASENAME=hyperledger/iroha",
-    "IROHA_NETWORK=iroha-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
-    "IROHA_POSTGRES_HOST=pg-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
-    "IROHA_POSTGRES_USER=pguser${env.GIT_COMMIT}",
-    "IROHA_POSTGRES_PASSWORD=${env.GIT_COMMIT}",
-    "IROHA_POSTGRES_PORT=5432",
-    "WS_DIR=/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
+  def environment = [
+    "CCACHE_DIR": "/opt/.ccache",
+    "DOCKER_REGISTRY_BASENAME": "hyperledger/iroha",
+    "IROHA_NETWORK": "iroha-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
+    "IROHA_POSTGRES_HOST": "pg-0${env.CHANGE_ID}-${env.GIT_COMMIT}-${env.BUILD_NUMBER}",
+    "IROHA_POSTGRES_USER": "pguser${env.GIT_COMMIT}",
+    "IROHA_POSTGRES_PASSWORD": "${env.GIT_COMMIT}",
+    "IROHA_POSTGRES_PORT": "5432",
+    //"WS_DIR=/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
+    "WS_BASE_DIR": "/var/jenkins/workspace"
   ]
 }
+environment.each { it ->
+  environmentList.add("${it.key}=${it.value}")
+}
+def agentLabels = ['x86_64-agent': 'x86_64_aws_cross', 'armv8-agent': 'armv8-cross']
+def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
+def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
 
-def buildAgentLabels = ['x86_64_aws_cross']
-def testAgentLabels = ['armv8-cross']
-def buildBuilders = [:]
-
-def buildDebugStage(label, environment) {
+def buildSteps(label, arch, os, buildType, environment) {
   return {
     node(label) {
       withEnv(environment) {
-        dir("${WS_DIR}") {
-          debugBuild = load ".jenkinsci/debug-build-cross.groovy"
+        // checkout to expose env vars
+        checkout scm
+        sh("mkdir -p ${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}")
+        dir(ws) {
+          // then checkout into actual workspace
           checkout scm
+          debugBuild = load ".jenkinsci/debug-build-cross.groovy"
           debugBuild.doDebugBuild()
         }
       }
@@ -59,11 +67,12 @@ def buildDebugStage(label, environment) {
   }
 }
 
-def testDebugStage(label, environment) {
+def testSteps(label, arch, os, environment) {
   return {
     node(label) {
       withEnv(environment) {
-        dir("${WS_DIR}") {
+        checkout scm
+        dir("${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}") {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest()
         }
@@ -72,28 +81,15 @@ def testDebugStage(label, environment) {
   }
 }
 
-def buildDebugSteps = buildAgentLabels.collectEntries {
-  ["Run build on: ${it}" : buildDebugStage(it, environment)]
+for(int i=0; i < targetOS.size(); i++) {
+  targetArch.each { arch ->
+    tasks["${targetOS[i]}-${arch.key}"] = {
+      buildSteps(agentLabels['x86_64-agent'], arch.key, targetOS[i], "Debug", environmentList)
+      testSteps(arch.value, arch.key, targetOS[i], environmentList)
+    }
+  }
 }
 
-def buildTestSteps = testAgentLabels.collectEntries {
-  ["Run tests on: ${it}" : testDebugStage(it, environment)]
+stage('Debug build') {
+  parallel tasks
 }
-
-stage('Build') {
-  parallel buildDebugSteps
-}
-
-stage('Test') {
-  parallel buildTestSteps
-}
-// buildBuilders = [:]
-
-// for (x in buildAgentLabels) {
-//   def label = x
-//   buildBuilders[label] = {
-//     testDebugStep(label)
-//   }
-// }
-
-// parallel buildBuilders
