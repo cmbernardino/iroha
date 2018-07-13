@@ -46,7 +46,8 @@ node('master') {
 environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
 }
-def agentLabels = ['x86_64-agent': 'x86_64_aws_cross', 'armv8-agent': 'armv8-cross']
+//x86_64_aws_cross
+def agentLabels = ['x86_64-agent': 'ec2-fleet', 'armv8-agent': 'armv8-cross']
 def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
 def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
 
