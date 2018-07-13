@@ -48,8 +48,10 @@ environment.each { it ->
 }
 //x86_64_aws_cross
 def agentLabels = ['x86_64-agent': 'ec2-fleet', 'armv8-agent': 'armv8-cross']
-def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
-def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
+// def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
+def targetOS = ['debian-stretch']
+//def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
+def targetArch = ['arm64': agentLabels['armv8-agent']]
 
 def buildSteps(label, arch, os, buildType, environment) {
   return {
@@ -57,7 +59,9 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         checkout scm
-        sh("mkdir -p ${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}")
+        def ws = "${env.WS_BASE_DIR}/${env.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        sh("mkdir -p $ws")
+        sh("echo git commit is: ${env.GIT_COMMIT}")
         dir(ws) {
           // then checkout into actual workspace
           checkout scm
