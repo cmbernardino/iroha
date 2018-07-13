@@ -85,10 +85,8 @@ def testSteps(label, arch, os, environment) {
 for(int i=0; i < targetOS.size(); i++) {
   targetArch.each { arch ->
     tasks["${targetOS[i]}-${arch.key}"] = {
-      return {
-        buildSteps(agentLabels['x86_64-agent'], arch.key, targetOS[i], "Debug", environmentList)
-        testSteps(arch.value, arch.key, targetOS[i], environmentList)
-      }
+      buildSteps(agentLabels['x86_64-agent'], arch.key, targetOS[i], "Debug", environmentList)()
+      testSteps(arch.value, arch.key, targetOS[i], environmentList)()
     }
   }
 }
