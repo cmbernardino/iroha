@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def doDebugBuild() {
+def doDebugBuild(workspace) {
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
   	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
@@ -20,7 +20,7 @@ def doDebugBuild() {
     """
     sh "cmake --build build -- -j${PARALLELISM}"
     sh "ccache --show-stats"
-    sh "mkdir -p $WS_DIR/build/shared_libs"
+    sh "mkdir -p ${workspace}/build/shared_libs"
     // sh """
     //   for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/bin/* | \
     //   	grep -v 'not found' | \
@@ -29,7 +29,7 @@ def doDebugBuild() {
     //   	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
     //   done
     // """
-    sh "cp -r \$STAGING/lib/* $WS_DIR/build/shared_libs"
+    sh "cp -r \$STAGING/lib/* ${workspace}/build/shared_libs"
   }
 }
 

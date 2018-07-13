@@ -66,7 +66,7 @@ def buildSteps(label, arch, os, buildType, environment) {
           // then checkout into actual workspace
           checkout scm
           debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-          debugBuild.doDebugBuild()
+          debugBuild.doDebugBuild(workspace)
         }
       }
     }
