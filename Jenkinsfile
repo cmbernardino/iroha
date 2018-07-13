@@ -34,8 +34,8 @@ node('master') {
   environment = [
     "CCACHE_DIR": "/opt/.ccache",
     "DOCKER_REGISTRY_BASENAME": "hyperledger/iroha",
-    "IROHA_NETWORK": "iroha-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}",
-    "IROHA_POSTGRES_HOST": "pg-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}",
+    "IROHA_NETWORK": "iroha-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}",
+    "IROHA_POSTGRES_HOST": "pg-0${scmVars.CHANGE_ID}-${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}",
     "IROHA_POSTGRES_USER": "pguser${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PASSWORD": "${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PORT": "5432",
@@ -59,7 +59,7 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         def scmVars = checkout scm
-        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}"
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $workspace")
         sh("echo git commit is: ${scmVars.GIT_COMMIT}")
         dir(workspace) {
@@ -78,7 +78,7 @@ def testSteps(label, arch, os, environment) {
     node(label) {
       withEnv(environment) {
         def scmVars = checkout scm
-        dir("${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}") {
+        dir("${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}") {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest()
         }
