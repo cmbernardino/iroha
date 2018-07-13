@@ -39,7 +39,6 @@ node('master') {
     "IROHA_POSTGRES_USER": "pguser${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PASSWORD": "${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PORT": "5432",
-    //"WS_DIR=/var/jenkins/workspace/09ea0b41fe86d884c6ecf57676d34ecacfb5411d-30"
     "WS_BASE_DIR": "/var/jenkins/workspace"
   ]
 }
@@ -59,7 +58,8 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         def scmVars = checkout scm
-        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        //def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $workspace")
         sh("echo git commit is: ${scmVars.GIT_COMMIT}")
         dir(workspace) {
@@ -78,9 +78,12 @@ def testSteps(label, arch, os, environment) {
     node(label) {
       withEnv(environment) {
         def scmVars = checkout scm
-        dir("${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}") {
+        //def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        //dir(workspace) {
+        def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        dir(workspace) {
           testBuild = load ".jenkinsci/debug-test.groovy"
-          testBuild.doDebugTest()
+          testBuild.doDebugTest(workspace)
         }
       }
     }

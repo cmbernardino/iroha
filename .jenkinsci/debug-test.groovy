@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def doDebugTest() {
+def doDebugTest(workspace) {
   sh "docker network create ${env.IROHA_NETWORK}"
   docker.image('postgres:9.5').withRun(""
   + " -e POSTGRES_USER=${env.IROHA_POSTGRES_USER}"
@@ -13,7 +13,7 @@ def doDebugTest() {
 	+ " -e IROHA_POSTGRES_USER=${env.IROHA_POSTGRES_USER}"
 	+ " -e IROHA_POSTGRES_PASSWORD=${env.IROHA_POSTGRES_PASSWORD}"
 	+ " --network=${env.IROHA_NETWORK}") {
-	    sh "sudo cp -r $WS_DIR/build/shared_libs/* /usr/lib/"
+	    sh "sudo cp -r ${workspace}/build/shared_libs/* /usr/lib/"
 	  	sh "cd build; ctest --output-on-failure"
 	}
   }
