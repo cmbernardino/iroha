@@ -50,7 +50,7 @@ def agentLabels = ['x86_64-agent': 'ec2-fleet', 'arm64-agent': 'armv8-cross']
 // def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
 def targetOS = ['debian-stretch']
 //def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
-def targetArch = ['arm64': agentLabels['armv8-agent']]
+def targetArch = ['arm64': agentLabels['arm64-agent']]
 
 def buildSteps(label, arch, os, buildType, environment) {
   return {
