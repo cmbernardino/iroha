@@ -47,7 +47,7 @@ environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
 }
 //x86_64_aws_cross
-def agentLabels = ['x86_64-agent': 'ec2-fleet', 'armv8-agent': 'armv8-cross']
+def agentLabels = ['x86_64-agent': 'ec2-fleet', 'arm64-agent': 'armv8-cross']
 // def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
 def targetOS = ['debian-stretch']
 //def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
@@ -59,10 +59,10 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         def scmVars = checkout scm
-        def ws = "${scmVars.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}"
-        sh("mkdir -p $ws")
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}"
+        sh("mkdir -p $workspace")
         sh("echo git commit is: ${scmVars.GIT_COMMIT}")
-        dir(ws) {
+        dir(workspace) {
           // then checkout into actual workspace
           checkout scm
           debugBuild = load ".jenkinsci/debug-build-cross.groovy"
@@ -78,7 +78,7 @@ def testSteps(label, arch, os, environment) {
     node(label) {
       withEnv(environment) {
         def scmVars = checkout scm
-        dir("${scmVars.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}") {
+        dir("${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${scmVars.BUILD_NUMBER}-${arch}-${os}") {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest()
         }
@@ -88,10 +88,11 @@ def testSteps(label, arch, os, environment) {
 }
 
 for(int i=0; i < targetOS.size(); i++) {
+  def axisOS = targetOS[i]
   targetArch.each { arch ->
-    tasks["${targetOS[i]}-${arch.key}"] = {
-      buildSteps(agentLabels['x86_64-agent'], arch.key, targetOS[i], "Debug", environmentList)()
-      testSteps(arch.value, arch.key, targetOS[i], environmentList)()
+    tasks["${axisOS}-${arch.key}"] = {
+      buildSteps(agentLabels['x86_64-agent'], arch.key, axisOS, "Debug", environmentList)()
+      testSteps(arch.value, arch.key, axisOS, environmentList)()
     }
   }
 }
