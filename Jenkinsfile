@@ -25,10 +25,14 @@
 //   timestamps()
 // ])
 
-properties([parameters([[$class: 'ChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'What to build?', filterLength: 1, filterable: false, name: 'what_to_build', randomName: 'choice-parameter-3496245039566069', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: true, script: 'return [\'binaries\', \'bindings\']']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'Choose what to build', filterLength: 1, filterable: false, name: 'build_components', randomName: 'choice-parameter-3496245047669097', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: true, script: 'return \'Debug\''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'binaries\') && what_to_build.contains(\'bindings\')) {
-  return [\'it-is-a-list\']
-}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: 'Python bindings build type', filterLength: 1, filterable: false, name: 'PBBuildType', randomName: 'choice-parameter-3496245054096895', referencedParameters: 'PythonBindings', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: 'return [\'Debug\']'], script: [classpath: [], sandbox: false, script: 'return [\'Debug\', \'Release\']']]]])])
-
+properties([parameters([[$class: 'ChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'What to build?', filterLength: 1, filterable: false, name: 'what_to_build', randomName: 'choice-parameter-3497380172535803', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: true, script: 'return [\'binaries\', \'bindings\']']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'Choose what to build', filterLength: 1, filterable: false, name: 'build_components', randomName: 'choice-parameter-3497380178986995', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'binaries\')) {
+  return [\'x86_64-linux-gnu\', \'aarch64-linux-gnu\', \'arm-linux-gnueabihf\', \'x86_64-apple-darwin16\']
+}
+if(what_to_build.contains(\'bindings\')) {
+  return [\'x86_64-linux-gnu\', \'aarch64-linux-gnu\', \'arm-linux-gnueabihf\', \'x86_64-apple-darwin16\', \'x86_64-windows\']
+}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'build_type', randomName: 'choice-parameter-3497380184651916', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'binaries\') || what_to_build.contains(\'bindings\')) {
+  return  [\'Debug\', \'Release\']
+}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: 'Python bindings build type', filterLength: 1, filterable: false, name: 'PBBuildType', randomName: 'choice-parameter-3497380188966844', referencedParameters: 'PythonBindings', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: 'return [\'Debug\']'], script: [classpath: [], sandbox: false, script: 'return [\'Debug\', \'Release\']']]]])])
 
 
 def environmentList = []
