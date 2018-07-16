@@ -38,7 +38,7 @@ else { return \'\' }''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_C
 }''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, name: 'bindings_type', randomName: 'choice-parameter-3499892141536590', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return [\'Python2\', \'Python3\', \'Java\', \'Android\']']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_MULTI_SELECT', description: '', filterLength: 1, filterable: false, name: 'android_bindings_platforms', randomName: 'choice-parameter-3499892145904354', referencedParameters: 'bindings_type', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(bindings_type.contains(\'Android\')) {
   return [\'arm64-v8a\', \'armeabi-v7a\', \'armeabi\', \'x86_64\', \'x86\']
 }''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'android_bindings_abi', randomName: 'choice-parameter-3499892155972533', referencedParameters: 'bindings_type', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(bindings_type.contains(\'Android\')) {
-  return [26,25,24]
+  return [1..4]
 }''']]]])])
 
 def environmentList = []
