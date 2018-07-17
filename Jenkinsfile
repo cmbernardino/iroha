@@ -62,6 +62,7 @@ node('master') {
     "IROHA_POSTGRES_PORT": "5432",
     "WS_BASE_DIR": "/var/jenkins/workspace"
   ]
+  sh("echo build type ${params.binaries_build_type}")
 }
 environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
@@ -82,12 +83,11 @@ def buildSteps(label, arch, os, buildType, environment) {
         def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
         //def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $workspace")
-        sh("echo git commit is: ${scmVars.GIT_COMMIT}")
         dir(workspace) {
           // then checkout into actual workspace
           checkout scm
           debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-          debugBuild.doDebugBuild(workspace)
+          debugBuild.doDebugBuild(arch, os, buildType, workspace)
         }
       }
     }
@@ -111,17 +111,22 @@ def testSteps(label, arch, os, environment) {
   }
 }
 
-for(int i=0; i < targetOS.size(); i++) {
-  def axisOS = targetOS[i]
-  targetArch.each { arch ->
-    tasks["${axisOS}-${arch.key}"] = {
-      buildSteps(agentLabels['x86_64-agent'], arch.key, axisOS, "Debug", environmentList)()
-      testSteps(arch.value, arch.key, axisOS, environmentList)()
+// build binaries
+if(what_to_build == 'binaries') {
+  for(int i=0; i < targetOS.size(); i++) {
+    def axisOS = targetOS[i]
+    targetArch.each { arch ->
+      tasks["${axisOS}-${arch.key}"] = {
+        buildSteps(agentLabels['x86_64-agent'], arch.key, axisOS, binaries_build_type, environmentList)()
+        testSteps(arch.value, arch.key, axisOS, environmentList)()
+      }
+    }
+    stage('Build & Test') {
+      parallel tasks
     }
   }
 }
-if(5>6) {
-  stage('Debug build') {
-    parallel tasks
-  }
-}
+
+
+// build bindings
+// build docs
