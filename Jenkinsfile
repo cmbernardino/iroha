@@ -157,9 +157,11 @@ def tasks = [:]
 if(params.iroha) {
   builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
-    for(int i=0; i < platform.size(); i++) {
-      tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
-        buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
+    if(platform.size() > 0) {
+      for(int i=0; i < platform.size(); i++) {
+        tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
+          buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
+        }
       }
     }
   }
