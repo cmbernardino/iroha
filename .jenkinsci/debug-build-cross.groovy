@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 def doDebugBuild(arch, os, buildType, workspace) {
+  os = replaceAll('_', '-')
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-${os}-${arch}").inside(""
   	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
@@ -13,7 +14,7 @@ def doDebugBuild(arch, os, buildType, workspace) {
       cmake \
         -H. \
         -Bbuild \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_BUILD_TYPE=${buildType} \
         -DCOVERAGE=OFF \
         -DTESTING=ON \
         -DCMAKE_TOOLCHAIN_FILE=/opt/toolchain.cmake

@@ -118,20 +118,19 @@ environment.each { it ->
 def buildSteps(label, arch, os, buildType, environment) {
   return {
     node(label) {
-      // withEnv(environment) {
-      //   // checkout to expose env vars
-      //   def scmVars = checkout scm
-      //   //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
-      //   def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
-      //   sh("mkdir -p $workspace")
-      //   dir(workspace) {
-      //     // then checkout into actual workspace
-      //     checkout scm
-      //     debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-      //     debugBuild.doDebugBuild(arch, os, buildType, workspace)
-      //   }
-      // }
-      sh("echo 123123")
+      withEnv(environment) {
+        // checkout to expose env vars
+        def scmVars = checkout scm
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        sh("mkdir -p $workspace")
+        dir(workspace) {
+          // then checkout into actual workspace
+          checkout scm
+          debugBuild = load ".jenkinsci/debug-build-cross.groovy"
+          debugBuild.doDebugBuild(arch, os, buildType, workspace)
+        }
+      }
     }
   }
 }
@@ -158,9 +157,7 @@ if(params.iroha) {
   builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
     for(int i=0; i < platform.size(); i++) {
-      println("platform size is ${platform.size()}")
       if(platform[i].size() > 0) {
-        println("agent: ${agent}, arch: ${platform[i][0]}, os: ${platform[i][1]}, bt: ${params.IrohaBuildType}, envList: ${environmentList}")
         def platformArch = platform[i][0]
         def platformOS = platform[i][1]
         tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
