@@ -157,6 +157,7 @@ if(params.iroha) {
   builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
     for(int i=0; i < platform.size(); i++) {
+      println("platform size is ${platform.size()}")
       if(platform[i].size() > 0) {
         tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
           buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
