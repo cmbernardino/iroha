@@ -29,6 +29,11 @@ properties([
 
 def environmentList = []
 def environment = [:]
+def agentLabels = ['amd64-agent': 'ec2-fleet',
+                   'arm64-agent': 'armv8-cross',
+                   'armhf-agent': 'armv7-cross',
+                   'mac-agent': 'mac',
+                   'windows-agent': 'win']
 def builders =
   [
   'build':[
