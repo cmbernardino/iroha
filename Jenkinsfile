@@ -162,6 +162,7 @@ if(params.iroha) {
         node(label) {
           sh("echo hello world!")
         }
+      }
     }
     stage('Build & Test') {
       parallel tasks
