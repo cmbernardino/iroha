@@ -82,12 +82,12 @@ def builders =
 
 def userInputArchOsTuples() {
   combinationsTuples = []
-  m = ['arch': ['amd64': amd64, 'arm64': arm64, 'armhf': armhf],
-       'os'  : ['ubuntu_xenial': ubuntu_xenial,
-                'ubuntu_bionic': ubuntu_bionic,
-                'debian_stretch': debian_stretch,
-                'macos': macos,
-                'windows': windows]]
+  m = ['arch': ['amd64': params.amd64, 'arm64': params.arm64, 'armhf': params.armhf],
+       'os'  : ['ubuntu_xenial': params.ubuntu_xenial,
+                'ubuntu_bionic': params.ubuntu_bionic,
+                'debian_stretch': params.debian_stretch,
+                'macos': params.macos,
+                'windows': params.windows]]
   mArch = m['arch'].findAll { it.value == true }.collect { it.key }
   mOs = m['os'].findAll { it.value == true }.collect { it.key }
   combinationsList = GroovyCollections.combinations([mArch, mOs])
