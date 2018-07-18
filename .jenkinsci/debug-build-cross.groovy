@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
-def doDebugBuild(workspace) {
-  docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-debian-stretch-arm64").inside(""
+def doDebugBuild(arch, os, buildType, workspace) {
+  docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-${os}-${arch}").inside(""
   	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
       ccache --version

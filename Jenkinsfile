@@ -1,54 +1,96 @@
-// properties([
-//   parameters([
-//     booleanParam(defaultValue: true, description: 'Build `iroha`', name: 'iroha'),
-//     booleanParam(defaultValue: false, description: 'Build `bindings`', name: 'bindings'),
-//     booleanParam(defaultValue: true, description: '', name: 'x86_64_linux'),
-//     booleanParam(defaultValue: false, description: '', name: 'armv7_linux'),
-//     booleanParam(defaultValue: false, description: '', name: 'armv8_linux'),
-//     booleanParam(defaultValue: false, description: '', name: 'x86_64_macos'),
-//     booleanParam(defaultValue: false, description: '', name: 'x86_64_win'),
-//     choice(choices: 'Debug\nRelease', description: 'Iroha build type', name: 'build_type'),
-//     booleanParam(defaultValue: false, description: 'Build Java bindings', name: 'JavaBindings'),
-//     choice(choices: 'Release\nDebug', description: 'Java bindings build type', name: 'JBBuildType'),
-//     string(defaultValue: 'jp.co.soramitsu.iroha', description: 'Java bindings package name', name: 'JBPackageName'),
-//     booleanParam(defaultValue: false, description: 'Build Python bindings', name: 'PythonBindings'),
-//     choice(choices: 'Release\nDebug', description: 'Python bindings build type', name: 'PBBuildType'),
-//     choice(choices: 'python3\npython2', description: 'Python bindings version', name: 'PBVersion'),
-//     booleanParam(defaultValue: false, description: 'Build Android bindings', name: 'AndroidBindings'),
-//     choice(choices: '26\n25\n24\n23\n22\n21\n20\n19\n18\n17\n16\n15\n14', description: 'Android Bindings ABI Version', name: 'ABABIVersion'),
-//     choice(choices: 'Release\nDebug', description: 'Android bindings build type', name: 'ABBuildType'),
-//     choice(choices: 'arm64-v8a\narmeabi-v7a\narmeabi\nx86_64\nx86', description: 'Android bindings platform', name: 'ABPlatform'),
-//     booleanParam(defaultValue: false, description: 'Build docs', name: 'Doxygen'),
-//     string(defaultValue: '4', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')
-//   ]),
-//   buildDiscarder(logRotator(numToKeepStr: '20')),
-//   timestamps()
-// ])
-
-properties([buildDiscarder(logRotator(numToKeepStr: '20')), parameters([[$class: 'ChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'What to build?', filterLength: 1, filterable: false, name: 'what_to_build', randomName: 'choice-parameter-3503725973434771', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: true, script: 'return [\'binaries:selected\', \'bindings\']']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'binaries_build_type', randomName: 'choice-parameter-3503725978108830', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'binaries\')) {
-  return  [\'Debug\', \'Release\']
-}
-else { return \'\' }''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, name: 'binaries_platforms', randomName: 'choice-parameter-3503725982718097', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'binaries\')) {
-  return [\'x86_64-linux-gnu:selected\', \'aarch64-linux-gnu\', \'arm-linux-gnueabihf\', \'x86_64-apple-darwin16:selected\']
-}
-''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, name: 'bindings_type', randomName: 'choice-parameter-3503725987083103', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.equals(\'bindings\')) {
-  return [\'Python2\', \'Python3\', \'Java\', \'Android\']
-}
-''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'bindings_build_type', randomName: 'choice-parameter-3503725991564910', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'bindings\')) {
-  return  [\'Debug\', \'Release\']
-}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'os', randomName: 'choice-parameter-3503725995996470', referencedParameters: 'what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.equals(\'binaries\')) {
-  return [\'ubuntu-xenial\', \'ubuntu-bionic\', \'debian-stretch\']
-}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, name: 'bindings_platforms', randomName: 'choice-parameter-3503726000267918', referencedParameters: 'bindings_type,what_to_build', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(what_to_build.contains(\'bindings\') && (!bindings_type.equals(\'Android\'))) {
-  return [\'x86_64-linux-gnu\', \'aarch64-linux-gnu\', \'arm-linux-gnueabihf\', \'x86_64-apple-darwin16\', \'x86_64-windows\']
-}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_MULTI_SELECT', description: '', filterLength: 1, filterable: false, name: 'android_bindings_platforms', randomName: 'choice-parameter-3503726004192242', referencedParameters: 'bindings_type', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(bindings_type.contains(\'Android\')) {
-  return [\'arm64-v8a\', \'armeabi-v7a\', \'armeabi\', \'x86_64\', \'x86\']
-}''']]], [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'android_bindings_abi', randomName: 'choice-parameter-3503726009024446', referencedParameters: 'bindings_type', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: '''if(bindings_type.contains(\'Android\')) {
-  return [26,25,24,23,22,21,20,19,18,17,16,15,14]
-}''']]]])])
+properties([
+  parameters([
+    booleanParam(defaultValue: true, description: 'Build `iroha`', name: 'iroha'),
+    booleanParam(defaultValue: false, description: 'Build `bindings`', name: 'bindings'),
+    booleanParam(defaultValue: false, name: 'amd64'),
+    booleanParam(defaultValue: true, name: 'arm64'),
+    booleanParam(defaultValue: false, name: 'armhf'),
+    booleanParam(defaultValue: false, name: 'ubuntu-xenial'),
+    booleanParam(defaultValue: false, name: 'ubuntu-bionic'),
+    booleanParam(defaultValue: true, name: 'debian-stretch'),
+    booleanParam(defaultValue: false, name: 'macos'),
+    booleanParam(defaultValue: false, name: 'windows'),
+    choice(choices: 'Debug\nRelease', description: 'Iroha build type', name: 'IrohaBuildType'),
+    booleanParam(defaultValue: false, description: 'Build Java bindings', name: 'JavaBindings'),
+    choice(choices: 'Release\nDebug', description: 'Java bindings build type', name: 'JBBuildType'),
+    string(defaultValue: 'jp.co.soramitsu.iroha', description: 'Java bindings package name', name: 'JBPackageName'),
+    booleanParam(defaultValue: false, description: 'Build Python bindings', name: 'PythonBindings'),
+    choice(choices: 'Release\nDebug', description: 'Python bindings build type', name: 'PBBuildType'),
+    choice(choices: 'python3\npython2', description: 'Python bindings version', name: 'PBVersion'),
+    booleanParam(defaultValue: false, description: 'Build Android bindings', name: 'AndroidBindings'),
+    choice(choices: '26\n25\n24\n23\n22\n21\n20\n19\n18\n17\n16\n15\n14', description: 'Android Bindings ABI Version', name: 'ABABIVersion'),
+    choice(choices: 'Release\nDebug', description: 'Android bindings build type', name: 'ABBuildType'),
+    choice(choices: 'arm64-v8a\narmeabi-v7a\narmeabi\nx86_64\nx86', description: 'Android bindings platform', name: 'ABPlatform'),
+    booleanParam(defaultValue: false, description: 'Build docs', name: 'Doxygen'),
+    string(defaultValue: '4', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')
+  ]),
+  buildDiscarder(logRotator(numToKeepStr: '20'))
+])
 
 def environmentList = []
 def environment = [:]
-def tasks = [:]
+def builders =
+  [
+  'build':[
+    (agentLabels['amd64-agent']):
+    [
+      new Tuple('amd64', 'ubuntu-xenial'),
+      new Tuple('amd64', 'ubuntu-bionic'),
+      new Tuple('amd64', 'debian-stretch'),
+      new Tuple('arm64', 'ubuntu-xenial'),
+      new Tuple('arm64', 'ubuntu-bionic'),
+      new Tuple('arm64', 'debian-stretch'),
+      new Tuple('armhf', 'ubuntu-xenial'),
+      new Tuple('armhf', 'ubuntu-bionic'),
+      new Tuple('armhf', 'debian-stretch')],
+    (agentLabels['mac-agent']):
+    [
+      new Tuple('amd64', 'macos')],
+    (agentLabels['windows-agent']):
+    [
+      new Tuple('amd64', 'windows')
+    ]],
+  'test':[
+    (agentLabels['amd64-agent']):
+    [
+      new Tuple('amd64', 'ubuntu-xenial'),
+      new Tuple('amd64', 'ubuntu-bionic'),
+      new Tuple('amd64', 'debian-stretch')],
+    (agentLabels['arm64-agent']):
+    [
+      new Tuple('arm64', 'ubuntu-xenial'),
+      new Tuple('arm64', 'ubuntu-bionic'),
+      new Tuple('arm64', 'debian-stretch')],
+    (agentLabels['arm64-agent']):
+    [
+      new Tuple('armhf', 'ubuntu-xenial'),
+      new Tuple('armhf', 'ubuntu-bionic'),
+      new Tuple('armhf', 'debian-stretch')],
+    (agentLabels['mac-agent']):
+    [
+      new Tuple('amd64', 'macos')],
+    (agentLabels['windows-agent']):
+    [
+      new Tuple('amd64', 'windows')]
+    ]]
+
+
+def userInputArchOsTuples() {
+  combinationsTuples = []
+  m = ['arch': ['amd64': return amd64, 'arm64': return arm64, 'armhf': return armhf],
+       'os'  : ['ubuntu-xenial': return ubuntu-xenial,
+                'ubuntu-bionic': return ubuntu-bionic,
+                'debian-stretch': return debian-stretch,
+                'macos': return macos,
+                'windows': return windows]]
+  mArch = m['arch'].findAll { it.value == true }.collect { it.key }
+  mOs = m['os'].findAll { it.value == true }.collect { it.key }
+  combinationsList = GroovyCollections.combinations([mArch, mOs])
+  combinationsList.each { it ->
+    combinationsTuples.add(new Tuple(it[0], it[1]))
+  }
+  return combinationsTuples
+}
 
 node('master') {
   def scmVars = checkout scm
@@ -67,12 +109,6 @@ node('master') {
 environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
 }
-//x86_64_aws_cross
-def agentLabels = ['x86_64-agent': 'ec2-fleet', 'arm64-agent': 'armv8-cross']
-// def targetOS = ['ubuntu-xenial', 'ubuntu-bionic', 'debian-stretch', 'macos']
-def targetOS = ['debian-stretch']
-//def targetArch = ['x86_64': agentLabels['x86_64-agent'], 'arm64': agentLabels['armv8-agent']]
-def targetArch = ['arm64': agentLabels['arm64-agent']]
 
 def buildSteps(label, arch, os, buildType, environment) {
   return {
@@ -80,8 +116,8 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         def scmVars = checkout scm
-        def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
-        //def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $workspace")
         dir(workspace) {
           // then checkout into actual workspace
@@ -99,9 +135,8 @@ def testSteps(label, arch, os, environment) {
     node(label) {
       withEnv(environment) {
         def scmVars = checkout scm
-        //def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
-        //dir(workspace) {
-        def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
         dir(workspace) {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest(workspace)
@@ -111,14 +146,14 @@ def testSteps(label, arch, os, environment) {
   }
 }
 
+def tasks = [:]
 // build binaries
 if(what_to_build == 'binaries') {
-  for(int i=0; i < targetOS.size(); i++) {
-    def axisOS = targetOS[i]
-    targetArch.each { arch ->
-      tasks["${axisOS}-${arch.key}"] = {
-        buildSteps(agentLabels['x86_64-agent'], arch.key, axisOS, binaries_build_type, environmentList)()
-        testSteps(arch.value, arch.key, axisOS, environmentList)()
+  builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
+  builders.each { agent, platform ->
+    for(int i=0; i < platform.size(); i++) {
+      tasks["${agent}-${platform[i][0]}-${platform}[i][1]"] = {
+        buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
       }
     }
     stage('Build & Test') {
@@ -126,7 +161,6 @@ if(what_to_build == 'binaries') {
     }
   }
 }
-
 
 // build bindings
 // build docs
