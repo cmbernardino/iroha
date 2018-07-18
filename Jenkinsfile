@@ -159,7 +159,7 @@ if(params.iroha) {
     for(int i=0; i < platform.size(); i++) {
       println("platform size is ${platform.size()}")
       if(platform[i].size() > 0) {
-        println("agent: ${agent}, arch: ${platform[i][0]}, os: ${platform[i][1]}")
+        println("agent: ${agent}, arch: ${platform[i][0]}, os: ${platform[i][1]}, bt: ${params.IrohaBuildType}, envList: ${environmentList}")
         println("done println")
         tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
           node(agent) {
