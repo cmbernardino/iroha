@@ -158,8 +158,10 @@ if(params.iroha) {
   builders.each { agent, platform ->
     for(int i=0; i < platform.size(); i++) {
       tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
-        buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
-      }
+        //buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
+        node(label) {
+          sh("echo hello world!")
+        }
     }
     stage('Build & Test') {
       parallel tasks
