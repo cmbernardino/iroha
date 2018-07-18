@@ -5,9 +5,9 @@ properties([
     booleanParam(defaultValue: false, name: 'amd64'),
     booleanParam(defaultValue: true, name: 'arm64'),
     booleanParam(defaultValue: false, name: 'armhf'),
-    booleanParam(defaultValue: false, name: 'ubuntu-xenial'),
-    booleanParam(defaultValue: false, name: 'ubuntu-bionic'),
-    booleanParam(defaultValue: true, name: 'debian-stretch'),
+    booleanParam(defaultValue: false, name: 'ubuntu_xenial'),
+    booleanParam(defaultValue: false, name: 'ubuntu_bionic'),
+    booleanParam(defaultValue: true, name: 'debian_stretch'),
     booleanParam(defaultValue: false, name: 'macos'),
     booleanParam(defaultValue: false, name: 'windows'),
     choice(choices: 'Debug\nRelease', description: 'Iroha build type', name: 'IrohaBuildType'),
@@ -39,15 +39,15 @@ def builders =
   'build':[
     (agentLabels['amd64-agent']):
     [
-      ['amd64', 'ubuntu-xenial'],
-      ['amd64', 'ubuntu-bionic'],
-      ['amd64', 'debian-stretch'],
-      ['arm64', 'ubuntu-xenial'],
-      ['arm64', 'ubuntu-bionic'],
-      ['arm64', 'debian-stretch'],
-      ['armhf', 'ubuntu-xenial'],
-      ['armhf', 'ubuntu-bionic'],
-      ['armhf', 'debian-stretch']],
+      ['amd64', 'ubuntu_xenial'],
+      ['amd64', 'ubuntu_bionic'],
+      ['amd64', 'debian_stretch'],
+      ['arm64', 'ubuntu_xenial'],
+      ['arm64', 'ubuntu_bionic'],
+      ['arm64', 'debian_stretch'],
+      ['armhf', 'ubuntu_xenial'],
+      ['armhf', 'ubuntu_bionic'],
+      ['armhf', 'debian_stretch']],
     (agentLabels['mac-agent']):
     [
       ['amd64', 'macos']],
@@ -58,19 +58,19 @@ def builders =
   'test':[
     (agentLabels['amd64-agent']):
     [
-      ['amd64', 'ubuntu-xenial'],
-      ['amd64', 'ubuntu-bionic'],
-      ['amd64', 'debian-stretch']],
+      ['amd64', 'ubuntu_xenial'],
+      ['amd64', 'ubuntu_bionic'],
+      ['amd64', 'debian_stretch']],
     (agentLabels['arm64-agent']):
     [
-      ['arm64', 'ubuntu-xenial'],
-      ['arm64', 'ubuntu-bionic'],
-      ['arm64', 'debian-stretch']],
+      ['arm64', 'ubuntu_xenial'],
+      ['arm64', 'ubuntu_bionic'],
+      ['arm64', 'debian_stretch']],
     (agentLabels['arm64-agent']):
     [
-      ['armhf', 'ubuntu-xenial'],
-      ['armhf', 'ubuntu-bionic'],
-      ['armhf', 'debian-stretch']],
+      ['armhf', 'ubuntu_xenial'],
+      ['armhf', 'ubuntu_bionic'],
+      ['armhf', 'debian_stretch']],
     (agentLabels['mac-agent']):
     [
       ['amd64', 'macos']],
@@ -83,9 +83,9 @@ def builders =
 def userInputArchOsTuples() {
   combinationsTuples = []
   m = ['arch': ['amd64': amd64, 'arm64': arm64, 'armhf': armhf],
-       'os'  : ['ubuntu-xenial': ubuntu-xenial,
-                'ubuntu-bionic': ubuntu-bionic,
-                'debian-stretch': debian-stretch,
+       'os'  : ['ubuntu_xenial': ubuntu_xenial,
+                'ubuntu_bionic': ubuntu_bionic,
+                'debian_stretch': debian_stretch,
                 'macos': macos,
                 'windows': windows]]
   mArch = m['arch'].findAll { it.value == true }.collect { it.key }
@@ -121,7 +121,7 @@ def buildSteps(label, arch, os, buildType, environment) {
       withEnv(environment) {
         // checkout to expose env vars
         def scmVars = checkout scm
-        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
         def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
         sh("mkdir -p $workspace")
         dir(workspace) {
@@ -141,7 +141,7 @@ def testSteps(label, arch, os, environment) {
       withEnv(environment) {
         def scmVars = checkout scm
         def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
-        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian-stretch"
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
         dir(workspace) {
           testBuild = load ".jenkinsci/debug-test.groovy"
           testBuild.doDebugTest(workspace)
