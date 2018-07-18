@@ -160,6 +160,7 @@ if(params.iroha) {
       println("platform size is ${platform.size()}")
       if(platform[i].size() > 0) {
         tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
+          println("agent: ${agent}, arch: ${platform[i][0]}, os: ${platform[i][1]}")
           buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
         }
       }
