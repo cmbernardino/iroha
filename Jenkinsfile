@@ -159,7 +159,7 @@ if(params.iroha) {
     for(int i=0; i < platform.size(); i++) {
       tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
         //buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
-        node(label) {
+        node(agent) {
           sh("echo hello world!")
         }
       }
