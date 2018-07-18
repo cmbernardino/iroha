@@ -109,7 +109,7 @@ node('master') {
     "IROHA_POSTGRES_PORT": "5432",
     "WS_BASE_DIR": "/var/jenkins/workspace"
   ]
-  sh("echo build type ${params.binaries_build_type}")
+  sh("echo build type ${params.IrohaBuildType}")
 }
 environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
@@ -153,7 +153,7 @@ def testSteps(label, arch, os, environment) {
 
 def tasks = [:]
 // build binaries
-if(what_to_build == 'binaries') {
+if(params.iroha) {
   builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
     for(int i=0; i < platform.size(); i++) {
