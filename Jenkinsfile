@@ -39,44 +39,44 @@ def builders =
   'build':[
     (agentLabels['amd64-agent']):
     [
-      new Tuple('amd64', 'ubuntu-xenial'),
-      new Tuple('amd64', 'ubuntu-bionic'),
-      new Tuple('amd64', 'debian-stretch'),
-      new Tuple('arm64', 'ubuntu-xenial'),
-      new Tuple('arm64', 'ubuntu-bionic'),
-      new Tuple('arm64', 'debian-stretch'),
-      new Tuple('armhf', 'ubuntu-xenial'),
-      new Tuple('armhf', 'ubuntu-bionic'),
-      new Tuple('armhf', 'debian-stretch')],
+      ['amd64', 'ubuntu-xenial'],
+      ['amd64', 'ubuntu-bionic'],
+      ['amd64', 'debian-stretch'],
+      ['arm64', 'ubuntu-xenial'],
+      ['arm64', 'ubuntu-bionic'],
+      ['arm64', 'debian-stretch'],
+      ['armhf', 'ubuntu-xenial'],
+      ['armhf', 'ubuntu-bionic'],
+      ['armhf', 'debian-stretch']],
     (agentLabels['mac-agent']):
     [
-      new Tuple('amd64', 'macos')],
+      ['amd64', 'macos']],
     (agentLabels['windows-agent']):
     [
-      new Tuple('amd64', 'windows')
+      ['amd64', 'windows']
     ]],
   'test':[
     (agentLabels['amd64-agent']):
     [
-      new Tuple('amd64', 'ubuntu-xenial'),
-      new Tuple('amd64', 'ubuntu-bionic'),
-      new Tuple('amd64', 'debian-stretch')],
+      ['amd64', 'ubuntu-xenial'],
+      ['amd64', 'ubuntu-bionic'],
+      ['amd64', 'debian-stretch']],
     (agentLabels['arm64-agent']):
     [
-      new Tuple('arm64', 'ubuntu-xenial'),
-      new Tuple('arm64', 'ubuntu-bionic'),
-      new Tuple('arm64', 'debian-stretch')],
+      ['arm64', 'ubuntu-xenial'],
+      ['arm64', 'ubuntu-bionic'],
+      ['arm64', 'debian-stretch']],
     (agentLabels['arm64-agent']):
     [
-      new Tuple('armhf', 'ubuntu-xenial'),
-      new Tuple('armhf', 'ubuntu-bionic'),
-      new Tuple('armhf', 'debian-stretch')],
+      ['armhf', 'ubuntu-xenial'],
+      ['armhf', 'ubuntu-bionic'],
+      ['armhf', 'debian-stretch']],
     (agentLabels['mac-agent']):
     [
-      new Tuple('amd64', 'macos')],
+      ['amd64', 'macos']],
     (agentLabels['windows-agent']):
     [
-      new Tuple('amd64', 'windows')]
+      ['amd64', 'windows']]
     ]]
 
 
@@ -92,7 +92,7 @@ def userInputArchOsTuples() {
   mOs = m['os'].findAll { it.value == true }.collect { it.key }
   combinationsList = GroovyCollections.combinations([mArch, mOs])
   combinationsList.each { it ->
-    combinationsTuples.add(new Tuple(it[0], it[1]))
+    combinationsTuples.add([it[0], it[1]])
   }
   return combinationsTuples
 }
