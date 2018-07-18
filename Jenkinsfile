@@ -164,9 +164,9 @@ if(params.iroha) {
         }
       }
     }
-    stage('Build & Test') {
-      parallel tasks
-    }
+  }
+  stage('Build & Test') {
+    parallel tasks
   }
 }
 
