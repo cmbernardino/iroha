@@ -118,20 +118,19 @@ environment.each { it ->
 def buildSteps(label, arch, os, buildType, environment) {
   return {
     node(label) {
-      // withEnv(environment) {
-      //   // checkout to expose env vars
-      //   def scmVars = checkout scm
-      //   //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
-      //   def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
-      //   sh("mkdir -p $workspace")
-      //   dir(workspace) {
-      //     // then checkout into actual workspace
-      //     checkout scm
-      //     debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-      //     debugBuild.doDebugBuild(arch, os, buildType, workspace)
-      //   }
-      // }
-      sh("echo hello world")
+      withEnv(environment) {
+        // checkout to expose env vars
+        def scmVars = checkout scm
+        //def workspace = "/var/jenkins/workspace/97acaa2bc1fa1db62e6a0531901e0f41886422ce-99-arm64-debian_stretch"
+        def workspace = "${env.WS_BASE_DIR}/${scmVars.GIT_COMMIT}-${env.BUILD_NUMBER}-${arch}-${os}"
+        sh("mkdir -p $workspace")
+        dir(workspace) {
+          // then checkout into actual workspace
+          checkout scm
+          debugBuild = load ".jenkinsci/debug-build-cross.groovy"
+          debugBuild.doDebugBuild(arch, os, buildType, workspace)
+        }
+      }
     }
   }
 }
@@ -157,10 +156,10 @@ def tasks = [:]
 if(params.iroha) {
   builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
-    if(platform.size() > 0) {
-      for(int i=0; i < platform.size(); i++) {
+    for(int i=0; i < platform.size(); i++) {
+      if(platform[i].size() > 0) {
         tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
-          buildSteps('ec2-fleet', 'amd64', 'debian_stretch', 'Release', environmentList).call()
+          buildSteps(agent, platform[i][0], platform[i][1], params.IrohaBuildType, environmentList)()
         }
       }
     }
