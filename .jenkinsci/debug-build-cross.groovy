@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 def doDebugBuild(arch, os, buildType, workspace) {
-  os = replaceAll('_', '-')
+  os = os.replaceAll('_', '-')
   docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-${os}-${arch}").inside(""
   	+ " -v /opt/ccache:${CCACHE_DIR}") {
     sh """
