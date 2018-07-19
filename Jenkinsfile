@@ -80,8 +80,7 @@ def agentsMap =
     [
       ['amd64', 'windows']]
     ]]
-def builders = [:]
-def testers = [:]
+
 
 def userInputArchOsTuples() {
   combinationsTuples = []
@@ -120,8 +119,7 @@ environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
 }
 
-def buildSteps(String label, String arch, String os,
-  String buildType, Boolean coverage, Map environment, dockerImage) {
+def buildSteps(String label, String arch, String os, String buildType, Boolean coverage, Map environment, dockerImage) {
   return {
     node(label) {
       withEnv(environment) {
