@@ -30,21 +30,23 @@ def doDebugBuild(buildType, coverage, workspace, dockerImage) {
   if (dockerImage) {
     def dPullOrBuild = load ".jenkinsci/docker-pull-or-build.groovy"
     def previousCommit = pCommit.previousCommitOrCurrent()
-    def iC = dPullOrBuild.dockerPullOrUpdate(
-        dockerImage,
-        // TODO: fix paths
-        "${env.GIT_RAW_BASE_URL}/${env.GIT_COMMIT}/docker/develop/Dockerfile",
-        "${env.GIT_RAW_BASE_URL}/${previousCommit}/docker/develop/Dockerfile",
-        "${env.GIT_RAW_BASE_URL}/develop/docker/develop/Dockerfile",
-        ['PARALLELISM': env.PARALLELISM])
-    if(GIT_LOCAL_BRANCH == 'develop') {
-      withRegistry('https://registry.hub.docker.com', env.DOCKER_REGISTRY_CREDENTIALS_ID) {
-        iC.push
-      }
-    }
-    iC.inside("-v /opt/ccache:${CCACHE_DIR}") {
+    // def iC = dPullOrBuild.dockerPullOrUpdate(
+    //     dockerImage,
+    //     // TODO: fix paths
+    //     "${env.GIT_RAW_BASE_URL}/${env.GIT_COMMIT}/docker/develop/Dockerfile",
+    //     "${env.GIT_RAW_BASE_URL}/${previousCommit}/docker/develop/Dockerfile",
+    //     "${env.GIT_RAW_BASE_URL}/develop/docker/develop/Dockerfile",
+    //     ['PARALLELISM': env.PARALLELISM])
+    // if(GIT_LOCAL_BRANCH == 'develop') {
+    //   withRegistry('https://registry.hub.docker.com', env.DOCKER_REGISTRY_CREDENTIALS_ID) {
+    //     iC.push
+    //   }
+    // }
+    // iC.inside("-v /opt/ccache:${CCACHE_DIR}") {
+    docker.image(dockerImage).inside("-v /opt/ccache:${CCACHE_DIR}") {
       buildBody(buildType, workspace)
     }
+    //}
   }
   else {
     buildBody(buildType, workspace)

@@ -170,7 +170,7 @@ if(params.iroha) {
         def dockerImage = ''
         // windows and mac are built on a host, not in docker
         if(['ubuntu_xenial', 'ubuntu_bionic', 'debian_stretch'].contains(platformOS)) {
-          dockerImage = "${environment['DOCKER_REGISTRY_BASENAME']}:crossbuild-${os}-${arch}"
+          dockerImage = "${environment['DOCKER_REGISTRY_BASENAME']}:crossbuild-${platformOS}-${platformArch}"
         }
         jobs.add([buildSteps(agent, platformArch, platformOS, params.IrohaBuildType,
                              irohaCoverage, environmentList, dockerImage)])
