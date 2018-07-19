@@ -1,10 +1,7 @@
 #!/usr/bin/env groovy
 
-def doDebugBuild(arch, os, buildType, workspace) {
-  os = os.replaceAll('_', '-')
-  docker.image("${DOCKER_REGISTRY_BASENAME}:crossbuild-${os}-${arch}").inside(""
-  	+ " -v /opt/ccache:${CCACHE_DIR}") {
-    sh """
+def buildBody(buildType, coverage, workspace) {
+  sh """
       ccache --version
       ccache --show-stats
       ccache --zero-stats
@@ -15,23 +12,44 @@ def doDebugBuild(arch, os, buildType, workspace) {
         -H. \
         -Bbuild \
         -DCMAKE_BUILD_TYPE=${buildType} \
-        -DCOVERAGE=OFF \
-        -DTESTING=ON \
+        -DCOVERAGE=${(coverage) ? 'ON' : 'OFF'} \
+        -DTESTING=${(buildType == 'Debug') ? 'ON' : 'OFF'} \
         -DCMAKE_TOOLCHAIN_FILE=/opt/toolchain.cmake
     """
-    sh "cmake --build build -- -j${PARALLELISM}"
+    sh "cmake --build build -- -j${env.PARALLELISM}"
+    if(coverage) {
+      sh "cmake --build build --target coverage.init.info"
+    }
     sh "ccache --show-stats"
     sh "mkdir -p ${workspace}/build/shared_libs"
-    // sh """
-    //   for solib in \$(\$CROSS_TRIPLE_PREFIX-ldd --root \$STAGING $WS_DIR/build/bin/* | \
-    //   	grep -v 'not found' | \
-    //   	awk '/\\.so/{print \$1}' | \
-    //   	sort -u); do \
-    //   	  find \$STAGING -name \$solib -exec cp {} $WS_DIR/build/shared_libs \\; ; \
-    //   done
-    // """
     sh "cp -r \$STAGING/lib/* ${workspace}/build/shared_libs"
+}
+
+def doDebugBuild(buildType, coverage, workspace, dockerImage) {
+  os = os.replaceAll('_', '-')
+  if (dockerImage) {
+    def dPullOrBuild = load ".jenkinsci/docker-pull-or-build.groovy"
+    def previousCommit = pCommit.previousCommitOrCurrent()
+    def iC = dPullOrBuild.dockerPullOrUpdate(
+        dockerImage,
+        // TODO: fix paths
+        "${env.GIT_RAW_BASE_URL}/${env.GIT_COMMIT}/docker/develop/Dockerfile",
+        "${env.GIT_RAW_BASE_URL}/${previousCommit}/docker/develop/Dockerfile",
+        "${env.GIT_RAW_BASE_URL}/develop/docker/develop/Dockerfile",
+        ['PARALLELISM': env.PARALLELISM])
+    if(GIT_LOCAL_BRANCH == 'develop') {
+      withRegistry('https://registry.hub.docker.com', env.DOCKER_REGISTRY_CREDENTIALS_ID) {
+        iC.push
+      }
+    }
+    iC.inside("-v /opt/ccache:${CCACHE_DIR}") {
+      buildBody(buildType, workspace)
+    }
+  }
+  else {
+    buildBody(buildType, workspace)
   }
 }
+
 
 return this

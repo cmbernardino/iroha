@@ -1,6 +1,8 @@
 properties([
   parameters([
     booleanParam(defaultValue: true, description: 'Build `iroha`', name: 'iroha'),
+    booleanParam(defaultValue: true, description: 'Run iroha tests?', name: 'irohaTests'),
+    booleanParam(defaultValue: false, description: 'Collect iroha coverage?', name: 'irohaCoverage'),
     booleanParam(defaultValue: false, description: 'Build `bindings`', name: 'bindings'),
     booleanParam(defaultValue: false, name: 'amd64'),
     booleanParam(defaultValue: true, name: 'arm64'),
@@ -22,7 +24,7 @@ properties([
     choice(choices: 'Release\nDebug', description: 'Android bindings build type', name: 'ABBuildType'),
     choice(choices: 'arm64-v8a\narmeabi-v7a\narmeabi\nx86_64\nx86', description: 'Android bindings platform', name: 'ABPlatform'),
     booleanParam(defaultValue: false, description: 'Build docs', name: 'Doxygen'),
-    string(defaultValue: '4', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')
+    string(defaultValue: '8', description: 'How much parallelism should we exploit. "4" is optimal for machines with modest amount of memory and at least 4 cores', name: 'PARALLELISM')
   ]),
   buildDiscarder(logRotator(numToKeepStr: '20'))
 ])
@@ -34,7 +36,7 @@ def agentLabels = ['amd64-agent': 'ec2-fleet',
                    'armhf-agent': 'armv7-cross',
                    'mac-agent': 'mac',
                    'windows-agent': 'win']
-def builders =
+def agentsMap =
   [
   'build':[
     (agentLabels['amd64-agent']):
@@ -78,7 +80,8 @@ def builders =
     [
       ['amd64', 'windows']]
     ]]
-
+def builders = [:]
+def testers = [:]
 
 def userInputArchOsTuples() {
   combinationsTuples = []
@@ -107,7 +110,9 @@ node('master') {
     "IROHA_POSTGRES_USER": "pguser${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PASSWORD": "${scmVars.GIT_COMMIT}",
     "IROHA_POSTGRES_PORT": "5432",
-    "WS_BASE_DIR": "/var/jenkins/workspace"
+    "WS_BASE_DIR": "/var/jenkins/workspace",
+    "GIT_RAW_BASE_URL": "https://raw.githubusercontent.com/hyperledger/iroha",
+    "DOCKER_REGISTRY_CREDENTIALS_ID": 'docker-hub-credentials'
   ]
   sh("echo build type ${params.IrohaBuildType}")
 }
@@ -115,7 +120,8 @@ environment.each { it ->
   environmentList.add("${it.key}=${it.value}")
 }
 
-def buildSteps(label, arch, os, buildType, environment) {
+def buildSteps(String label, String arch, String os,
+  String buildType, Boolean coverage, Map environment, dockerImage) {
   return {
     node(label) {
       withEnv(environment) {
@@ -128,14 +134,14 @@ def buildSteps(label, arch, os, buildType, environment) {
           // then checkout into actual workspace
           checkout scm
           debugBuild = load ".jenkinsci/debug-build-cross.groovy"
-          debugBuild.doDebugBuild(arch, os, buildType, workspace)
+          debugBuild.doDebugBuild(buildType, workspace, dockerImage)
         }
       }
     }
   }
 }
 
-def testSteps(label, arch, os, environment) {
+def testSteps(String label, String arch, String os, Boolean coverage, Map environment, dockerImage) {
   return {
     node(label) {
       withEnv(environment) {
@@ -152,24 +158,59 @@ def testSteps(label, arch, os, environment) {
 }
 
 def tasks = [:]
-// build binaries
+def jobs = []
+// build Iroha binaries
 if(params.iroha) {
-  builders = builders['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
+  builders = agentsMap['build'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
   builders.each { agent, platform ->
-    for(int i=0; i < platform.size(); i++) {
-      if(platform[i].size() > 0) {
-        def platformArch = platform[i][0]
-        def platformOS = platform[i][1]
-        tasks["${agent}-${platform[i][0]}-${platform[i][1]}"] = {
-          buildSteps(agent, platformArch, platformOS, params.IrohaBuildType, environmentList)()
+    for(t in platform) {
+      if(t.size() > 0) {
+        def platformArch = t[0]
+        def platformOS = t[1]
+        def dockerImage = ''
+        // windows and mac are built on a host, not in docker
+        if(['ubuntu_xenial', 'ubuntu_bionic', 'debian_stretch'].contains(platformOS)) {
+          dockerImage = "${environment['DOCKER_REGISTRY_BASENAME']}:crossbuild-${os}-${arch}"
+        }
+        jobs.add([buildSteps(agent, platformArch, platformOS, params.IrohaBuildType,
+                             irohaCoverage, environmentList, dockerImage)])
+      }
+    }
+  }
+  // run tests if required
+  if(irohaTests) {
+    testers = agentsMap['test'].each { k, v -> v.retainAll(userInputArchOsTuples() as Object[])}
+    testers.each { agent, platform ->
+      for(t in platform) {
+        if(t.size() > 0) {
+          def platformArch = t[0]
+          def platformOS = t[1]
+          def dockerImage = ''
+          // windows and mac are built on a host, not in docker
+          if(['ubuntu_xenial', 'ubuntu_bionic', 'debian_stretch'].contains(platformOS)) {
+            //dockerImage = "${environment['DOCKER_REGISTRY_BASENAME']}:crossbuild-${os}-${arch}"
+          }
+          job = testSteps(agent, platformArch, platformOS,
+                          irohaCoverage, environmentList, dockerImage)
+          jobs.collect { it.add(job) }
         }
       }
+    }
+  }
+}
+
+if(jobs) {
+  for(int i=0; i<jobs.size(); i++) {
+    def job = jobs[i]
+    tasks["${i}"] = {
+      job.each { it() }
     }
   }
   stage('Build & Test') {
     parallel tasks
   }
 }
+
 
 // build bindings
 // build docs
