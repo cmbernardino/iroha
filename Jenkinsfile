@@ -170,8 +170,8 @@ if(params.iroha) {
         if(['ubuntu_xenial', 'ubuntu_bionic', 'debian_stretch'].contains(platformOS)) {
           dockerImage = "${environment['DOCKER_REGISTRY_BASENAME']}:crossbuild-${platformOS}-${platformArch}"
         }
-        jobs.add([buildSteps(agent, platformArch, platformOS, params.IrohaBuildType,
-                             irohaCoverage, environmentList, dockerImage)])
+        //jobs.add([buildSteps(agent, platformArch, platformOS, params.IrohaBuildType,
+        //                     irohaCoverage, environmentList, dockerImage)])
       }
     }
   }
